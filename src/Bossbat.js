@@ -9,7 +9,8 @@ const JOB_TTL = 2000;
 const JOB_PREFIX = 'bossbat';
 
 export default class Bossbat {
-  constructor({ connection, prefix = JOB_PREFIX, ttl = JOB_TTL, tz, disableRedisConfig } = {}) {
+  constructor({ connection, prefix = JOB_PREFIX, ttl = JOB_TTL, tz,
+                  disableRedisConfig, defaultJob } = {}) {
     const DB_NUMBER = (connection && connection.db) || 0;
 
     this.prefix = prefix;
@@ -46,6 +47,12 @@ export default class Bossbat {
         if (this.jobs[jobName].every || this.jobs[jobName].cron) {
           this.scheduleRun(jobName, this.jobs[jobName]);
         }
+      } else if (defaultJob) {
+        // hire this job and schedule it using the default job
+        this.hire(jobName, defaultJob);
+
+        // run the job
+        this.doWork(jobName);
       }
     });
   }
